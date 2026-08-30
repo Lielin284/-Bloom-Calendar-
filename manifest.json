@@ -1,0 +1,8 @@
+{
+  "name": "Bloom Calendar",
+  "short_name": "Bloom",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#FBF6F2",
+  "theme_color": "#FBF6F2"
+}
