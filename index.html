@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#FBF6F2">
 <title>Bloom Calendar - Chic Edition</title>
+<link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -26,10 +27,7 @@
   }
   *{box-sizing:border-box;}
   
-  html {
-    background-color: var(--paper) !important;
-  }
-  
+  html { background-color: var(--paper) !important; }
   body{
     margin:0;
     padding:32px 20px;
@@ -54,7 +52,6 @@
     .app{grid-template-columns:1fr;}
   }
   
-  /* Glassmorphism */
   .card{
     background:rgba(251, 246, 242, 0.7);
     backdrop-filter: blur(14px);
@@ -74,7 +71,6 @@
   .cal-title-row .sprig{width:20px; height:20px;}
   .month{font-family:'Cormorant Garamond', serif; font-size:32px; font-weight:600; line-height:1;}
   
-  /* Hanakotoba */
   .hanakotoba{
     font-family:'Cormorant Garamond', serif; font-style:italic; font-size:14px;
     color:var(--rose-deep); margin-top:4px; letter-spacing:0.02em;
@@ -90,7 +86,6 @@
     cursor:pointer; transition:all .15s;
   }
   .icon-btn:hover{background:var(--rose); color:#fff; border-color:var(--rose); transform:translateY(-1px);}
-  .icon-btn:focus-visible, button:focus-visible, input:focus-visible{outline:2px solid var(--lilac-deep); outline-offset:2px;}
   .today-btn{
     border-radius:999px; border:1px solid rgba(46,37,40,0.1); background:rgba(255,255,255,0.6);
     font-family:'Quicksand'; font-weight:600; font-size:12px; padding:0 14px; height:32px;
@@ -98,15 +93,15 @@
   }
   .today-btn:hover{background:var(--lilac); border-color:var(--lilac);}
 
-  /* Top Actions (Wallpaper) */
   .top-actions{display:flex; gap:8px; margin-top:10px; justify-content:flex-end;}
   .action-chip{
-    font-family:'Quicksand'; font-size:11px; font-weight:700; border-radius:999px; padding:4px 10px;
-    border:1px solid rgba(46,37,40,0.1); background:rgba(255,255,255,0.8);
+    font-family:'Quicksand'; font-size:11px; font-weight:700; border-radius:999px; padding:5px 12px;
+    border:1px solid rgba(46,37,40,0.15); background:rgba(255,255,255,0.8);
     color:var(--ink); cursor:pointer; display:inline-flex; align-items:center; gap:5px;
     transition:all .15s;
   }
   .action-chip:hover{background:var(--paper); border-color:var(--rose-deep);}
+  .action-chip.active{background:var(--sage); border-color:var(--sage-deep);}
 
   .weekdays,.grid{display:grid; grid-template-columns:repeat(7,1fr); gap:4px;}
   .weekdays div{text-align:center; font-size:11px; font-weight:600; letter-spacing:0.06em; color:var(--ink-soft); padding:4px 0 8px;}
@@ -121,10 +116,8 @@
   .day.today{background:linear-gradient(135deg, var(--rose), var(--lilac)); color:#4A3347;}
   .day.selected{border-color:var(--rose-deep); background:rgba(255,255,255,0.7);}
   .day.holiday{background:rgba(240,184,196,0.3); color:var(--rose-deep); font-weight:700;}
-  .day.holiday.today{background:linear-gradient(135deg, var(--rose), var(--lilac)); color:#4A3347;}
   .day .hflag{position:absolute; top:3px; left:9px; right:9px; height:3px; border-radius:3px; background:var(--rose-deep);}
   
-  /* Habit Blooming Indicator (แทนจุดกลม) */
   .day .sprout-icon {
     position: absolute; bottom: 2px; width: 14px; height: 14px;
     opacity: 0; transform: scale(0.3) translateY(4px);
@@ -212,21 +205,20 @@
   .add-form button:hover{opacity:0.9;}
   .save-note{font-size:11px; color:var(--rose-deep); min-height:14px; margin-top:2px;}
 
-  /* ---- Botanical Background (Line Art & Blobs) ---- */
   .botanical-bg{position:fixed; inset:0; overflow:hidden; z-index:0; pointer-events:none;}
   .botanical-bg .scene{position:absolute; inset:0; width:100%; height:100%; opacity:0; transition:opacity 800ms ease;}
   .botanical-bg .scene.active{opacity:1;}
   .botanical-bg .scene svg{display:block; width:100%; height:100%;}
   .flower-group { transform-box: fill-box; transform-origin: center; }
 
-  /* ---- Full Screen Bloom Overlay ---- */
+  /* Full Screen Bloom Modal */
   .fullscreen-bloom {
     position: fixed; inset: 0; pointer-events: none; z-index: 9999;
     display: flex; align-items: center; justify-content: center; flex-direction: column;
     opacity: 0; transition: opacity 0.5s ease;
-    background: rgba(251,246,242,0.8); backdrop-filter: blur(8px);
+    background: rgba(251,246,242,0.85); backdrop-filter: blur(10px);
   }
-  .fullscreen-bloom.active { opacity: 1; }
+  .fullscreen-bloom.active { opacity: 1; pointer-events: auto; }
   .fullscreen-bloom svg {
     width: 180px; height: 180px; color: var(--gold);
     transform: scale(0) rotate(-45deg); 
@@ -239,10 +231,6 @@
     opacity: 0; transition: opacity 1s 0.4s;
   }
   .fullscreen-bloom.active .bloom-text { opacity: 1; }
-
-  @media (prefers-reduced-motion: reduce){
-    *{transition:none !important; animation:none !important;}
-  }
 
   @media (prefers-reduced-motion: no-preference){
     .anim-jan { animation: swaySlow 12s ease-in-out infinite; transform-origin: bottom center; }
@@ -275,7 +263,6 @@
     @keyframes shimmer { 0%, 100% { opacity: 0.1; transform: scale(0.5); } 50% { opacity: 1; transform: scale(1.2); } }
   }
 
-  /* SVG Position for Laptop vs Mobile */
   .botanical-bg .scene svg { transform: translateX(-5%) translateY(0%) scale(1.1); transform-origin: center; }
   @media (max-width:720px){
     .botanical-bg { opacity: 0.95; } 
@@ -285,8 +272,7 @@
 </head>
 <body>
 
-<!-- Notification Bloom Overlay -->
-<div class="fullscreen-bloom" id="fsBloomOverlay">
+<div class="fullscreen-bloom" id="fsBloomOverlay" onclick="this.classList.remove('active')">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
     <path d="M12 21V11"/>
     <path d="M12 11C12 7 8 7 8 3C12 3 12 7 12 11Z"/>
@@ -323,6 +309,8 @@
     </div>
 
     <div class="top-actions">
+      <!-- ปุ่มขอสิทธิ์การแจ้งเตือนแบบ Direct Action -->
+      <button class="action-chip" id="enableNotifyBtn">🔔 Enable Alerts</button>
       <button class="action-chip" id="exportWallpaperBtn">
         <svg style="width:13px;height:13px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
         Save Wallpaper
@@ -472,7 +460,6 @@ const Botanical = (function(){
     {name:'Poinsettia',      blob1:'#FCE4EA', blob2:'#F0BCC3', blob3:'#D68390', accent:'#C9A15A'}
   ];
 
-  /* --- SVG PATH GENERATORS (Line Art) --- */
   function roundPetal(len,wid){
     const w=wid/2;
     return `M0,0 C ${(-w).toFixed(1)},${(-len*0.3).toFixed(1)} ${(-w*0.9).toFixed(1)},${(-len*0.95).toFixed(1)} ${(-w*0.25).toFixed(1)},${(-len).toFixed(1)} C ${(-w*0.1).toFixed(1)},${(-len*1.02).toFixed(1)} ${(w*0.1).toFixed(1)},${(-len*1.02).toFixed(1)} ${(w*0.25).toFixed(1)},${(-len).toFixed(1)} C ${(w*0.9).toFixed(1)},${(-len*0.95).toFixed(1)} ${w.toFixed(1)},${(-len*0.3).toFixed(1)} 0,0 Z`;
@@ -488,6 +475,7 @@ const Botanical = (function(){
   function bell(w,h){
     return `M${(-w/2).toFixed(1)},0 C ${(-w/2).toFixed(1)},${(-h*0.78).toFixed(1)} ${(w/2).toFixed(1)},${(-h*0.78).toFixed(1)} ${(w/2).toFixed(1)},0 C ${(w/2).toFixed(1)},${(h*0.16).toFixed(1)} ${(-w/2).toFixed(1)},${(h*0.16).toFixed(1)} ${(-w/2).toFixed(1)},0 Z`;
   }
+
   function ringPaths(petalFn,r){
     let s=''; const count=r.count, spread=r.spreadDeg||360, start=r.startDeg||0, off=r.rotOffset||0;
     for(let k=0;k<count;k++){
@@ -599,20 +587,20 @@ const Botanical = (function(){
     layout += `<path d="M-100,500 C 100,200 400,900 800,200" stroke="var(--ink)" stroke-width="1" fill="none" opacity="0.2" />`;
     
     if (idx === 2 || idx === 8) {
-        for(let i=0; i<15; i++) {
-            let startX = 200 + Math.random() * 800;
-            let startY = Math.random() * 200;
-            let delay = Math.random() * 8;
-            layout += `<path d="${roundPetal(6,5)}" transform="translate(${startX},${startY})" fill="${c.petal}" class="anim-mar-float" style="animation-delay:${delay}s;" />`;
-        }
+      for(let i=0; i<18; i++) {
+        let startX = Math.random() * 1000;
+        let startY = Math.random() * 400;
+        let delay = Math.random() * 8;
+        layout += `<path d="${roundPetal(7,6)}" transform="translate(${startX},${startY})" fill="none" stroke="var(--ink)" stroke-width="1.5" class="anim-mar-float" style="animation-delay:${delay}s;" />`;
+      }
     }
     if (idx === 11) {
-        for(let i=0; i<20; i++) {
-            let px = Math.random() * 1000;
-            let py = Math.random() * 1000;
-            let delay = Math.random() * 4;
-            layout += `<circle cx="${px}" cy="${py}" r="2" fill="${c.accent}" class="anim-particle" style="animation-delay:${delay}s;" />`;
-        }
+      for(let i=0; i<25; i++) {
+        let px = Math.random() * 1000;
+        let py = Math.random() * 1000;
+        let delay = Math.random() * 4;
+        layout += `<circle cx="${px}" cy="${py}" r="2.5" fill="${c.accent}" class="anim-particle" style="animation-delay:${delay}s;" />`;
+      }
     }
 
     return `<svg viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice">${layout}</svg>`;
@@ -678,59 +666,96 @@ window.storage = window.storage || {
   set: async (k, v) => { window.storage._data[k] = v; }
 };
 
-/* --- 🔔 ระบบแจ้งเตือน Notification & Blooming --- */
-if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
-  Notification.requestPermission();
+/* --- 🔔 Notification Request Button Logic --- */
+const notifyBtn = document.getElementById('enableNotifyBtn');
+
+function updateNotifyButtonState() {
+  if (!("Notification" in window)) {
+    notifyBtn.style.display = 'none';
+    return;
+  }
+  if (Notification.permission === 'granted') {
+    notifyBtn.textContent = '🔔 Alerts Active';
+    notifyBtn.classList.add('active');
+  } else if (Notification.permission === 'denied') {
+    notifyBtn.textContent = '🔕 Alerts Blocked';
+  } else {
+    notifyBtn.textContent = '🔔 Enable Alerts';
+  }
 }
+
+notifyBtn.addEventListener('click', () => {
+  if (!("Notification" in window)) {
+    alert("This device doesn't support notifications.");
+    return;
+  }
+  Notification.requestPermission().then(permission => {
+    updateNotifyButtonState();
+    if (permission === 'granted') {
+      new Notification("🌸 Bloom Calendar", {
+        body: "Alerts enabled! You're ready to receive notifications."
+      });
+    }
+  });
+});
+updateNotifyButtonState();
 
 function triggerFullScreenBloom(text) {
   const overlay = document.getElementById('fsBloomOverlay');
+  if(!overlay) return;
   document.getElementById('fsBloomText').textContent = text;
   overlay.classList.add('active');
   setTimeout(() => overlay.classList.remove('active'), 5500);
 }
 
-function checkNotifications() {
-  if (!("Notification" in window) || Notification.permission !== "granted") return;
-  
+async function checkNotifications() {
   const now = new Date();
   const todayKey = iso(now);
   const nowInMins = now.getHours() * 60 + now.getMinutes();
 
-  window.storage.get('day:' + todayKey).then(res => {
-    if(!res || !res.value) return;
+  try {
+    const res = await window.storage.get('day:' + todayKey, false);
+    if (!res || !res.value) return;
+    
     let data = JSON.parse(res.value);
     let isUpdated = false;
 
+    if (!data.reminders || !Array.isArray(data.reminders)) return;
+
     data.reminders.forEach(rem => {
-      if(!rem.time) return;
+      if (!rem.time) return;
       const [remH, remM] = rem.time.split(':').map(Number);
       const remInMins = remH * 60 + remM;
 
-      // แจ้งเตือนล่วงหน้า 15 นาที
-      if(nowInMins === remInMins - 15 && !rem.notified15) {
-        new Notification("🌸 Upcoming Plan in 15 mins", { body: rem.text });
+      // 1. แจ้งเตือนล่วงหน้า 15 นาที
+      if (nowInMins >= remInMins - 15 && nowInMins < remInMins && !rem.notified15) {
+        if ("Notification" in window && Notification.permission === "granted") {
+          new Notification("🌸 Upcoming Plan in 15 mins", { body: rem.text || "You have an upcoming plan." });
+        }
         rem.notified15 = true;
         isUpdated = true;
       }
       
-      // บานสะพรั่งเต็มจอเมื่อถึงเวลาเป๊ะ
-      if(nowInMins === remInMins && !rem.bloomedExact) {
-        new Notification("✨ It's Time!", { body: rem.text });
-        triggerFullScreenBloom(rem.text);
+      // 2. บานสะพรั่งเต็มจอและแจ้งเตือนเมื่อถึงเวลาจริง
+      if (nowInMins >= remInMins && !rem.bloomedExact) {
+        if ("Notification" in window && Notification.permission === "granted") {
+          new Notification("✨ It's Time!", { body: rem.text || "Your plan is starting now." });
+        }
+        triggerFullScreenBloom(rem.text || "It's Time!");
         rem.bloomedExact = true;
         isUpdated = true;
       }
     });
 
-    if(isUpdated) {
-      window.storage.set('day:' + todayKey, JSON.stringify(data), false);
-      if(iso(selected) === todayKey) currentDay = data; 
+    if (isUpdated) {
+      await window.storage.set('day:' + todayKey, JSON.stringify(data), false);
+      if (iso(selected) === todayKey) currentDay = data;
     }
-  });
+  } catch (err) {
+    console.error("Notification check error:", err);
+  }
 }
-setInterval(checkNotifications, 15000); // เช็คเวลาทุกๆ 15 วินาที
-/* ------------------------------------------- */
+setInterval(checkNotifications, 10000);
 
 async function refreshMonthMarks(){
   const statusText=document.getElementById('statusText');
@@ -766,7 +791,6 @@ async function saveDay(d){
   try{
     await window.storage.set(key(d), JSON.stringify(currentDay), false);
     
-    // ตรวจสอบว่าถ้ายังมีบันทึกอยู่ ให้ใส่วันนั้นลงใน daysWithEntries เพื่อโชว์ดอกไม้
     if(currentDay.notes.length > 0 || currentDay.reminders.length > 0 || currentDay.location.length > 0){
       daysWithEntries.add(iso(d));
     } else {
@@ -809,7 +833,6 @@ function renderCalendar(){
       cell.appendChild(flag);
     }
     
-    // 🌱 เปลี่ยนจุดธรรมดาให้เป็นไอคอนดอกไม้ผลิ (Sprout Icon)
     if(daysWithEntries.has(iso(cellDate))){
       const sprout = document.createElementNS("http://www.w3.org/2000/svg", "svg");
       sprout.setAttribute('viewBox','0 0 24 24');
@@ -924,7 +947,6 @@ function submitEntry(type){
     const textInput=document.getElementById('input-reminders-text');
     const val=textInput.value.trim();
     if(!val){ noteEl.textContent='Give the reminder a title.'; return; }
-    // แนบสถานะเพื่อจัดการการแจ้งเตือนไว้ตั้งแต่ตอน Save
     currentDay.reminders.push({id:uid(), text:val, time:timeInput.value||'', notified15: false, bloomedExact: false});
     currentDay.reminders.sort((a,b)=> (a.time||'99:99').localeCompare(b.time||'99:99'));
     textInput.value=''; timeInput.value='';
@@ -967,10 +989,8 @@ document.getElementById('todayBtn').addEventListener('click',()=>{
   loadDay(selected);
 });
 
-// Wallpaper Event
 document.getElementById('exportWallpaperBtn').addEventListener('click', () => { window.print(); });
 
-// Init
 refreshMonthMarks();
 loadDay(selected);
 </script>
