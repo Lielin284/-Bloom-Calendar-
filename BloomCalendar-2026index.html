@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FBF6F2">
+<title>Bloom Calendar - Chic Edition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBF6F2;
+    --card:#FFFFFF;
+    --ink:#2E2528;
+    --ink-soft:#8A7488;
+    --rose:#F0B8C4;
+    --rose-deep:#E08FA0;
+    --lilac:#D7C7EA;
+    --lilac-deep:#B79EDA;
+    --sage:#B9C7A9;
+    --sage-deep:#8FA179;
+    --gold:#C9A15A;
+    --line:#EFE3E6;
+    --radius:18px;
+    --shadow:0 8px 32px -12px rgba(46,37,40,0.15);
+  }
+  *{box-sizing:border-box;}
+  
+  html {
+    background-color: var(--paper) !important;
+  }
+  
+  body{
+    margin:0;
+    padding:32px 20px;
+    padding-bottom: calc(32px + env(safe-area-inset-bottom));
+    background-color: var(--paper);
+    font-family:'Quicksand', sans-serif;
+    color:var(--ink);
+    min-height:100dvh;
+    overflow-x:hidden;
+  }
+  .app{
+    max-width:900px;
+    margin:0 auto;
+    display:grid;
+    grid-template-columns:1.15fr 1fr;
+    gap:22px;
+    align-items:start;
+    position:relative;
+    z-index:1;
+  }
+  @media (max-width:720px){
+    .app{grid-template-columns:1fr;}
+  }
+  
+  /* Glassmorphism */
+  .card{
+    background:rgba(251, 246, 242, 0.7);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:24px 24px 20px;
+    border:1px solid rgba(255,255,255,0.7);
+  }
+
+  .divider{display:flex; align-items:center; gap:10px; margin:14px 0 16px;}
+  .divider .hairline{flex:1; height:1px; background:linear-gradient(90deg, transparent, var(--gold) 50%, transparent); opacity:0.45;}
+  .sprig{width:16px; height:16px; flex-shrink:0; color:var(--gold);}
+
+  .cal-head{display:flex; align-items:flex-start; justify-content:space-between;}
+  .cal-title-row{display:flex; align-items:center; gap:8px;}
+  .cal-title-row .sprig{width:20px; height:20px;}
+  .month{font-family:'Cormorant Garamond', serif; font-size:32px; font-weight:600; line-height:1;}
+  
+  /* Hanakotoba */
+  .hanakotoba{
+    font-family:'Cormorant Garamond', serif; font-style:italic; font-size:14px;
+    color:var(--rose-deep); margin-top:4px; letter-spacing:0.02em;
+  }
+  .yr{font-family:'Quicksand'; font-size:13px; color:var(--ink-soft); margin-top:4px; letter-spacing:0.04em; font-weight:600;}
+  
+  .nav{display:flex; gap:6px;}
+  .icon-btn{
+    width:32px; height:32px; border-radius:50%;
+    border:1px solid rgba(46,37,40,0.1); background:rgba(255,255,255,0.6);
+    color:var(--ink); font-family:'Quicksand'; font-size:15px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:all .15s;
+  }
+  .icon-btn:hover{background:var(--rose); color:#fff; border-color:var(--rose); transform:translateY(-1px);}
+  .icon-btn:focus-visible, button:focus-visible, input:focus-visible{outline:2px solid var(--lilac-deep); outline-offset:2px;}
+  .today-btn{
+    border-radius:999px; border:1px solid rgba(46,37,40,0.1); background:rgba(255,255,255,0.6);
+    font-family:'Quicksand'; font-weight:600; font-size:12px; padding:0 14px; height:32px;
+    color:var(--ink); cursor:pointer; margin-right:6px; transition:all .15s;
+  }
+  .today-btn:hover{background:var(--lilac); border-color:var(--lilac);}
+
+  /* Top Actions (Wallpaper) */
+  .top-actions{display:flex; gap:8px; margin-top:10px; justify-content:flex-end;}
+  .action-chip{
+    font-family:'Quicksand'; font-size:11px; font-weight:700; border-radius:999px; padding:4px 10px;
+    border:1px solid rgba(46,37,40,0.1); background:rgba(255,255,255,0.8);
+    color:var(--ink); cursor:pointer; display:inline-flex; align-items:center; gap:5px;
+    transition:all .15s;
+  }
+  .action-chip:hover{background:var(--paper); border-color:var(--rose-deep);}
+
+  .weekdays,.grid{display:grid; grid-template-columns:repeat(7,1fr); gap:4px;}
+  .weekdays div{text-align:center; font-size:11px; font-weight:600; letter-spacing:0.06em; color:var(--ink-soft); padding:4px 0 8px;}
+  .day{
+    position:relative; aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+    font-family:'Quicksand'; font-weight:600; font-size:13.5px; color:var(--ink);
+    border-radius:12px; border:1.5px solid transparent; background:transparent; cursor:pointer;
+    transition:all .15s;
+  }
+  .day:hover{background:rgba(255,255,255,0.5); transform:scale(1.05);}
+  .day.blank{visibility:hidden; cursor:default;}
+  .day.today{background:linear-gradient(135deg, var(--rose), var(--lilac)); color:#4A3347;}
+  .day.selected{border-color:var(--rose-deep); background:rgba(255,255,255,0.7);}
+  .day.holiday{background:rgba(240,184,196,0.3); color:var(--rose-deep); font-weight:700;}
+  .day.holiday.today{background:linear-gradient(135deg, var(--rose), var(--lilac)); color:#4A3347;}
+  .day .hflag{position:absolute; top:3px; left:9px; right:9px; height:3px; border-radius:3px; background:var(--rose-deep);}
+  
+  /* Habit Blooming Indicator (แทนจุดกลม) */
+  .day .sprout-icon {
+    position: absolute; bottom: 2px; width: 14px; height: 14px;
+    opacity: 0; transform: scale(0.3) translateY(4px);
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); color: var(--gold);
+  }
+  .day.has-bloom .sprout-icon {
+    opacity: 1; transform: scale(1.1) translateY(0);
+    animation: bloomPop 0.4s ease-out;
+  }
+  @keyframes bloomPop {
+    0% { transform: scale(0.4) rotate(-20deg); }
+    70% { transform: scale(1.35) rotate(10deg); }
+    100% { transform: scale(1.1) rotate(0deg); }
+  }
+
+  .status-row{display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--ink-soft); margin-top:14px;}
+  .status-row .sprig{width:11px; height:11px;}
+  .legend{display:flex; gap:14px; font-size:11px; color:var(--ink-soft); margin-top:6px;}
+  .legend span{display:inline-flex; align-items:center; gap:5px;}
+  .legend .swatch{width:7px; height:7px; border-radius:50%; display:inline-block;}
+  .legend .swatch.gold{background:var(--gold);}
+  .legend .swatch.rose{background:var(--rose-deep);}
+
+  .holiday-banner{
+    display:none; align-items:center; gap:8px; font-size:12px; font-weight:700;
+    color:var(--rose-deep); background:linear-gradient(90deg, rgba(240,184,196,0.22), rgba(215,199,234,0.22));
+    border-radius:10px; padding:8px 12px; margin-top:10px;
+  }
+  .holiday-banner.show{display:flex;}
+  .holiday-banner svg{width:14px; height:14px; flex-shrink:0;}
+
+  .detail-date-num{font-family:'Cormorant Garamond', serif; font-size:46px; font-weight:600; line-height:0.9;}
+  .detail-weekday{font-family:'Cormorant Garamond', serif; font-style:italic; font-size:17px; color:var(--rose-deep); margin-top:2px;}
+  .detail-month{font-size:12.5px; color:var(--ink-soft); letter-spacing:0.05em; margin-top:2px;}
+
+  .section{margin-bottom:18px;}
+  .section:last-child{margin-bottom:0;}
+  .section-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;}
+  .section-label{display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink);}
+  .section-label svg{width:15px; height:15px; flex-shrink:0;}
+  .add-link{
+    border:none; background:none; font-family:'Quicksand'; font-weight:600; font-size:12px;
+    color:var(--ink-soft); cursor:pointer; padding:2px 6px; border-radius:6px;
+  }
+  .add-link:hover{color:var(--ink); background:rgba(255,255,255,0.5);}
+
+  .entry{
+    display:flex; align-items:flex-start; gap:8px;
+    border-radius:12px; padding:9px 10px; margin-bottom:6px; font-size:13.5px; line-height:1.4; background:rgba(255,255,255,0.6);
+  }
+  .entry.notes{border-left:3px solid #F0B8C4;}
+  .entry.reminders{border-left:3px solid #B79EDA;}
+  .entry.location{border-left:3px solid #B9C7A9;}
+  .entry .txt{flex:1;}
+  .entry.location .txt a{
+    color:var(--ink); background:rgba(185,199,169,0.4); text-decoration:none;
+    display:inline-flex; align-items:center; gap:6px; font-weight:700;
+    padding:5px 11px 5px 9px; border-radius:999px; transition:all .15s;
+  }
+  .entry.location .txt a:hover{background:var(--sage-deep); color:#fff;}
+  .entry.location .txt a svg{width:13px; height:13px; flex-shrink:0;}
+  .entry.location .txt a .go{font-size:11px; opacity:0.75;}
+  .entry .time-chip{
+    font-size:11px; font-weight:700; color:var(--ink); background:rgba(255,255,255,0.8);
+    border-radius:999px; padding:2px 7px; margin-right:6px; border:1px solid rgba(0,0,0,0.05);
+  }
+  .remove-btn{
+    border:none; background:none; color:var(--ink-soft); cursor:pointer; font-size:14px; line-height:1;
+    padding:2px 4px; border-radius:6px;
+  }
+  .remove-btn:hover{color:var(--rose-deep);}
+  .empty{font-size:12.5px; color:var(--ink-soft); font-style:italic; padding:2px 2px 4px;}
+
+  .add-form{display:none; gap:6px; margin-top:2px; margin-bottom:8px;}
+  .add-form.show{display:flex; flex-wrap:wrap;}
+  .add-form input{
+    font-family:'Quicksand'; font-size:13px; border:1px solid rgba(46,37,40,0.15); border-radius:9px;
+    padding:7px 10px; background:rgba(255,255,255,0.8); color:var(--ink); flex:1; min-width:110px;
+  }
+  .add-form input[type="time"]{flex:0 0 110px;}
+  .add-form button{
+    font-family:'Quicksand'; font-weight:700; font-size:12.5px; border:none; border-radius:9px;
+    padding:7px 12px; cursor:pointer; background:var(--ink); color:#fff;
+  }
+  .add-form button:hover{opacity:0.9;}
+  .save-note{font-size:11px; color:var(--rose-deep); min-height:14px; margin-top:2px;}
+
+  /* ---- Botanical Background (Line Art & Blobs) ---- */
+  .botanical-bg{position:fixed; inset:0; overflow:hidden; z-index:0; pointer-events:none;}
+  .botanical-bg .scene{position:absolute; inset:0; width:100%; height:100%; opacity:0; transition:opacity 800ms ease;}
+  .botanical-bg .scene.active{opacity:1;}
+  .botanical-bg .scene svg{display:block; width:100%; height:100%;}
+  .flower-group { transform-box: fill-box; transform-origin: center; }
+
+  /* ---- Full Screen Bloom Overlay ---- */
+  .fullscreen-bloom {
+    position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+    display: flex; align-items: center; justify-content: center; flex-direction: column;
+    opacity: 0; transition: opacity 0.5s ease;
+    background: rgba(251,246,242,0.8); backdrop-filter: blur(8px);
+  }
+  .fullscreen-bloom.active { opacity: 1; }
+  .fullscreen-bloom svg {
+    width: 180px; height: 180px; color: var(--gold);
+    transform: scale(0) rotate(-45deg); 
+    transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .fullscreen-bloom.active svg { transform: scale(1) rotate(0deg); }
+  .fullscreen-bloom .bloom-text {
+    position: absolute; margin-top: 220px; font-family: 'Cormorant Garamond', serif;
+    font-size: 32px; font-weight: 600; color: var(--ink); text-align: center;
+    opacity: 0; transition: opacity 1s 0.4s;
+  }
+  .fullscreen-bloom.active .bloom-text { opacity: 1; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important; animation:none !important;}
+  }
+
+  @media (prefers-reduced-motion: no-preference){
+    .anim-jan { animation: swaySlow 12s ease-in-out infinite; transform-origin: bottom center; }
+    .anim-feb { animation: petalOpen 3.5s ease-out forwards; }
+    .anim-mar-float { animation: floatSakura 14s linear infinite; }
+    .anim-may { animation: swingGentle 7s ease-in-out infinite; transform-origin: top center; }
+    .anim-jun { animation: slowBloom 5s ease-out forwards; }
+    .anim-jul { animation: ripple 6s ease-in-out infinite; }
+    .anim-aug { animation: hoverWater 7s ease-in-out infinite; }
+    .anim-sep { animation: swayGentle 8s ease-in-out infinite; transform-origin: bottom center; }
+    .anim-oct { animation: rotateSlow 45s linear infinite; }
+    .anim-nov { animation: breathe 6s ease-in-out infinite; }
+    .anim-dec { animation: swaySlow 9s ease-in-out infinite; transform-origin: bottom center; }
+    .anim-particle { animation: shimmer 4s ease-in-out infinite; }
+
+    @keyframes swaySlow { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+    @keyframes swayGentle { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+    @keyframes petalOpen { 0% { transform: scale(0.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    @keyframes floatSakura { 
+      0% { transform: translate(0, -50px) rotate(0deg); opacity: 0; } 
+      10% { opacity: 0.9; } 80% { opacity: 0.9; } 
+      100% { transform: translate(-300px, 1200px) rotate(360deg); opacity: 0; } 
+    }
+    @keyframes swingGentle { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+    @keyframes slowBloom { 0% { transform: scale(0.85); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    @keyframes ripple { 0%, 100% { transform: scale(1); opacity: 0.95; } 50% { transform: scale(1.04); opacity: 0.8; } }
+    @keyframes hoverWater { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+    @keyframes rotateSlow { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+    @keyframes shimmer { 0%, 100% { opacity: 0.1; transform: scale(0.5); } 50% { opacity: 1; transform: scale(1.2); } }
+  }
+
+  /* SVG Position for Laptop vs Mobile */
+  .botanical-bg .scene svg { transform: translateX(-5%) translateY(0%) scale(1.1); transform-origin: center; }
+  @media (max-width:720px){
+    .botanical-bg { opacity: 0.95; } 
+    .botanical-bg .scene svg { transform: translateY(-5%) scale(1.15); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Notification Bloom Overlay -->
+<div class="fullscreen-bloom" id="fsBloomOverlay">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+    <path d="M12 21V11"/>
+    <path d="M12 11C12 7 8 7 8 3C12 3 12 7 12 11Z"/>
+    <path d="M12 11C12 7 16 7 16 3C12 3 12 7 12 11Z"/>
+    <circle cx="12" cy="7" r="1.5" fill="currentColor"/>
+    <path d="M6 14C6 11 3 11 3 8C7 8 7 11 7 14Z"/>
+    <path d="M18 14C18 11 21 11 21 8C17 8 17 11 17 14Z"/>
+  </svg>
+  <div class="bloom-text" id="fsBloomText">It's time!</div>
+</div>
+
+<div class="botanical-bg" id="botanicalBg" aria-hidden="true">
+  <div class="scene" id="sceneA"></div>
+  <div class="scene" id="sceneB"></div>
+</div>
+
+<div class="app">
+
+  <div class="card">
+    <div class="cal-head">
+      <div>
+        <div class="cal-title-row">
+          <svg class="sprig" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 21V7"/><path d="M12 7C12 7 6 8 6 3C10.5 3 12 7 12 7Z"/><path d="M12 11C12 11 18 12 18 6C13 6 12 11 12 11Z"/></svg>
+          <div class="month" id="month"></div>
+        </div>
+        <div class="hanakotoba" id="hanakotobaText"></div>
+        <div class="yr" id="year"></div>
+      </div>
+      <div class="nav">
+        <button class="today-btn" id="todayBtn">Today</button>
+        <button class="icon-btn" id="prevBtn" aria-label="Previous month">&#8249;</button>
+        <button class="icon-btn" id="nextBtn" aria-label="Next month">&#8250;</button>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button class="action-chip" id="exportWallpaperBtn">
+        <svg style="width:13px;height:13px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Save Wallpaper
+      </button>
+    </div>
+
+    <div class="divider"><div class="hairline"></div><svg class="sprig" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 21V7"/><path d="M12 7C12 7 6 8 6 3C10.5 3 12 7 12 7Z"/><path d="M12 11C12 11 18 12 18 6C13 6 12 11 12 11Z"/></svg><div class="hairline"></div></div>
+
+    <div class="weekdays"><div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div></div>
+    <div class="grid" id="grid"></div>
+
+    <div class="status-row">
+      <svg class="sprig" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/></svg>
+      <span id="statusText">Loading your planner…</span>
+    </div>
+    <div class="legend">
+      <span><i class="swatch gold"></i>Your plans</span>
+      <span><i class="swatch rose"></i>Thai public holiday</span>
+    </div>
+  </div>
+
+  <div class="card" id="detailCard">
+    <div style="display:flex; align-items:flex-end; justify-content:space-between;">
+      <div>
+        <div class="detail-date-num" id="detailNum">--</div>
+        <div class="detail-weekday" id="detailWeekday"></div>
+        <div class="detail-month" id="detailMonth"></div>
+      </div>
+    </div>
+
+    <div class="holiday-banner" id="holidayBanner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21V7"/><path d="M12 7C12 7 6 8 6 3C10.5 3 12 7 12 7Z"/><path d="M12 11C12 11 18 12 18 6C13 6 12 11 12 11Z"/></svg>
+      <span id="holidayBannerText"></span>
+    </div>
+
+    <div class="divider"><div class="hairline"></div><svg class="sprig" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 21V7"/><path d="M12 7C12 7 6 8 6 3C10.5 3 12 7 12 7Z"/><path d="M12 11C12 11 18 12 18 6C13 6 12 11 12 11Z"/></svg><div class="hairline"></div></div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19.5C4 19.5 4 5 4 5C4 5 12 3 20 5C20 5 20 19.5 20 19.5C12 17.5 4 19.5 4 19.5Z"/><path d="M12 4V18"/></svg>
+          Notes
+        </div>
+        <button class="add-link" data-form="notes">+ Add note</button>
+      </div>
+      <div class="add-form" id="form-notes">
+        <input type="text" id="input-notes-text" placeholder="Write a note…">
+        <button data-save="notes">Save</button>
+      </div>
+      <div id="list-notes"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="10" r="5"/><path d="M12 5V3"/><circle cx="12" cy="10" r="1.4" fill="currentColor" stroke="none"/><path d="M12 10L14.2 8.6"/></svg>
+          Reminders
+        </div>
+        <button class="add-link" data-form="reminders">+ Add reminder</button>
+      </div>
+      <div class="add-form" id="form-reminders">
+        <input type="time" id="input-reminders-time">
+        <input type="text" id="input-reminders-text" placeholder="Reminder title…">
+        <button data-save="reminders">Save</button>
+      </div>
+      <div id="list-reminders"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21C12 21 5 14 5 9.2C5 5.2 8.1 2 12 2C15.9 2 19 5.2 19 9.2C19 14 12 21 12 21Z"/><circle cx="12" cy="9" r="2.6"/></svg>
+          Location
+        </div>
+        <button class="add-link" data-form="location">+ Add location</button>
+      </div>
+      <div class="add-form" id="form-location">
+        <input type="text" id="input-location-text" placeholder="Where?">
+        <button data-save="location">Save</button>
+      </div>
+      <div id="list-location"></div>
+    </div>
+
+    <div class="save-note" id="saveNote"></div>
+  </div>
+
+</div>
+
+<script>
+const monthNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const weekdayNames=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+const HANAKOTOBA = [
+  "Camellia — Perfect Charm & Deep Longing",
+  "Violet — Modest Worth & Hidden Grace",
+  "Cherry Blossom — Spiritual Beauty & Ephemeral Bloom",
+  "Tulip — Pure Compassion & Radiant Sunshine",
+  "Lily of the Valley — Return of Sweet Happiness",
+  "Rose — Tender Devotion & Everlasting Love",
+  "Water Lily — Purity of Heart & Serene Peace",
+  "Lotus — Awakening & Elegance Rising Above",
+  "Cosmos — Harmony, Order & Gentle Peace",
+  "Dahlia — Dignity, Nobility & Inner Strength",
+  "Chrysanthemum — Joy, Longevity & Golden Radiance",
+  "Poinsettia — Warm Hearth & Festive Celebration"
+];
+
+const Botanical = (function(){
+  const bg = document.getElementById('botanicalBg');
+  if(!bg) return {setMonth:function(){}};
+  const scenes = { A: document.getElementById('sceneA'), B: document.getElementById('sceneB') };
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let active='A', currentIdx=null;
+  
+  if(!prefersReduced && window.DeviceOrientationEvent){
+    window.addEventListener('deviceorientation', (e)=>{
+      if(!e.gamma) return;
+      const tiltX = Math.min(Math.max(e.gamma, -25), 25);
+      const tulip = document.getElementById('tulip-lean');
+      if(tulip) tulip.style.transform = `rotate(${tiltX * 0.8}deg)`;
+    }, true);
+  }
+
+  if(!prefersReduced){
+    window.addEventListener('mousemove', (e)=>{
+      const tulip = document.getElementById('tulip-lean');
+      if(tulip){
+        const mouseX = (e.clientX / window.innerWidth) - 0.5;
+        tulip.style.transform = `rotate(${mouseX * 50}deg)`;
+        tulip.style.transition = 'transform 0.15s ease-out';
+      }
+    }, {passive:true});
+  }
+
+  const months=[
+    {name:'Camellia',        blob1:'#FCE4EA', blob2:'#F3C6D2', blob3:'#E0A6B6', accent:'#C9A15A'},
+    {name:'Violet',          blob1:'#F4F0FA', blob2:'#E3D5F5', blob3:'#C9B4E4', accent:'#C9A15A'},
+    {name:'Cherry Blossom',  blob1:'#FFF0F3', blob2:'#FCE4EA', blob3:'#F3C6D2', accent:'#E08FA0'},
+    {name:'Tulip',           blob1:'#FCEEF1', blob2:'#F0BCC3', blob3:'#E3949E', accent:'#C9A15A'},
+    {name:'Lily of the Valley', blob1:'#FFFFFF', blob2:'#F1F5EC', blob3:'#DCE3D1', accent:'#8FA179'},
+    {name:'Rose',            blob1:'#FCE4EA', blob2:'#F3C6D2', blob3:'#E4A0B0', accent:'#C9A15A'},
+    {name:'Water Lily',      blob1:'#F4F0FA', blob2:'#EBE1F2', blob3:'#DDB8D4', accent:'#C9A15A'},
+    {name:'Lotus',           blob1:'#FCEEF1', blob2:'#F3C8D2', blob3:'#E39FAE', accent:'#C9A15A'},
+    {name:'Cosmos',          blob1:'#FFF0F3', blob2:'#FCEEF1', blob3:'#F5D6DE', accent:'#E08FA0'},
+    {name:'Dahlia',          blob1:'#FCE4EA', blob2:'#F3C6D2', blob3:'#D69AAF', accent:'#C9A15A'},
+    {name:'Chrysanthemum',   blob1:'#FCEEF1', blob2:'#E0A6B6', blob3:'#B67C90', accent:'#C9A15A'},
+    {name:'Poinsettia',      blob1:'#FCE4EA', blob2:'#F0BCC3', blob3:'#D68390', accent:'#C9A15A'}
+  ];
+
+  /* --- SVG PATH GENERATORS (Line Art) --- */
+  function roundPetal(len,wid){
+    const w=wid/2;
+    return `M0,0 C ${(-w).toFixed(1)},${(-len*0.3).toFixed(1)} ${(-w*0.9).toFixed(1)},${(-len*0.95).toFixed(1)} ${(-w*0.25).toFixed(1)},${(-len).toFixed(1)} C ${(-w*0.1).toFixed(1)},${(-len*1.02).toFixed(1)} ${(w*0.1).toFixed(1)},${(-len*1.02).toFixed(1)} ${(w*0.25).toFixed(1)},${(-len).toFixed(1)} C ${(w*0.9).toFixed(1)},${(-len*0.95).toFixed(1)} ${w.toFixed(1)},${(-len*0.3).toFixed(1)} 0,0 Z`;
+  }
+  function pointedPetal(len,wid){
+    const w=wid/2;
+    return `M0,0 C ${(-w*1.05).toFixed(1)},${(-len*0.35).toFixed(1)} ${(-w*0.5).toFixed(1)},${(-len*0.85).toFixed(1)} 0,${(-len).toFixed(1)} C ${(w*0.5).toFixed(1)},${(-len*0.85).toFixed(1)} ${(w*1.05).toFixed(1)},${(-len*0.35).toFixed(1)} 0,0 Z`;
+  }
+  function notchedPetal(len,wid,notch=0.14){
+    const w=wid/2;
+    return `M0,0 C ${(-w).toFixed(1)},${(-len*0.3).toFixed(1)} ${(-w*0.9).toFixed(1)},${(-len*0.92).toFixed(1)} ${(-w*0.32).toFixed(1)},${(-len*0.88).toFixed(1)} L 0,${(-len*(0.88-notch)).toFixed(1)} L ${(w*0.32).toFixed(1)},${(-len*0.88).toFixed(1)} C ${(w*0.9).toFixed(1)},${(-len*0.92).toFixed(1)} ${w.toFixed(1)},${(-len*0.3).toFixed(1)} 0,0 Z`;
+  }
+  function bell(w,h){
+    return `M${(-w/2).toFixed(1)},0 C ${(-w/2).toFixed(1)},${(-h*0.78).toFixed(1)} ${(w/2).toFixed(1)},${(-h*0.78).toFixed(1)} ${(w/2).toFixed(1)},0 C ${(w/2).toFixed(1)},${(h*0.16).toFixed(1)} ${(-w/2).toFixed(1)},${(h*0.16).toFixed(1)} ${(-w/2).toFixed(1)},0 Z`;
+  }
+  function ringPaths(petalFn,r){
+    let s=''; const count=r.count, spread=r.spreadDeg||360, start=r.startDeg||0, off=r.rotOffset||0;
+    for(let k=0;k<count;k++){
+      const ang=start+off+k*(spread/count);
+      s+=`<path d="${petalFn(r.len,r.wid)}" transform="rotate(${ang.toFixed(1)})" fill="rgba(251,246,242,0.65)" stroke="var(--ink)" stroke-width="1.8" stroke-linejoin="round"/>`;
+    }
+    return s;
+  }
+  function centerDotsRing(n,r,dotR,color){
+    let s='';
+    for(let k=0;k<n;k++){ const a=k*(2*Math.PI/n); s+=`<circle cx="${(r*Math.cos(a)).toFixed(1)}" cy="${(r*Math.sin(a)).toFixed(1)}" r="${dotR}" fill="${color}"/>`; }
+    return s;
+  }
+  function buildBloom(petalFn,rings,opts={}){
+    let g='<g>';
+    rings.forEach((r)=>{ g+=ringPaths(petalFn,r); });
+    if(opts.centerR){ g+=`<circle r="${opts.centerR}" fill="none" stroke="var(--ink)" stroke-width="1.8"/>`; }
+    if(opts.centerDots){ g+=centerDotsRing(opts.centerDots.n,opts.centerDots.r,opts.centerDots.dotR||1.6, opts.color || 'var(--ink)'); }
+    g+='</g>';
+    return g;
+  }
+  function stemLeaves(len,leafFn,leafScale=1){
+    return `<path d="M0,0 L0,${len}" stroke="var(--ink)" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+      <path d="${leafFn(len*0.32*leafScale,len*0.15*leafScale)}" transform="translate(0,${(len*0.5).toFixed(1)}) rotate(38)" fill="rgba(251,246,242,0.7)" stroke="var(--ink)" stroke-width="1.6"/>
+      <path d="${leafFn(len*0.28*leafScale,len*0.13*leafScale)}" transform="translate(0,${(len*0.68).toFixed(1)}) rotate(-42)" fill="rgba(251,246,242,0.7)" stroke="var(--ink)" stroke-width="1.6"/>`;
+  }
+  function poinsettiaBracts(count,len,wid,startDeg){
+    let s='';
+    for(let k=0;k<count;k++){
+      const ang=(startDeg||0)+k*(360/count);
+      s+=`<g transform="rotate(${ang.toFixed(1)})">
+            <path d="${pointedPetal(len,wid)}" fill="rgba(251,246,242,0.6)" stroke="var(--ink)" stroke-width="1.8"/>
+            <line x1="0" y1="-2" x2="0" y2="${(-len*0.85).toFixed(1)}" stroke="var(--ink)" stroke-width="1"/>
+          </g>`;
+    }
+    return s;
+  }
+
+  function getOrganicBlobs(c) {
+    return `
+      <g style="mix-blend-mode: multiply;" opacity="0.85">
+        <path fill="${c.blob1}" transform="translate(-100, -80) scale(4)" d="M45.7,-76.1C58.9,-69.3,69.1,-55.4,76.5,-40.3C83.9,-25.2,88.5,-8.8,85.6,6.3C82.7,21.5,72.4,35.4,60.8,47.4C49.2,59.4,36.2,69.5,21.1,75.1C6,80.7,-11.2,81.9,-27.1,77.5C-43.1,73.1,-57.8,63,-68.1,49.5C-78.4,36,-84.3,19.1,-84.8,2.1C-85.3,-15,-80.4,-32,-70.7,-45.5C-60.9,-58.9,-46.3,-68.9,-31.6,-74.6C-16.9,-80.3,-2,-81.8,13.2,-79.9C28.3,-78,41.9,-72.7,45.7,-76.1Z" />
+        <path fill="${c.blob2}" transform="translate(140, 100) scale(3.2) rotate(45)" d="M41.5,-65.7C55.4,-57.1,69.4,-49,76.5,-36.4C83.5,-23.7,83.6,-6.6,79.1,8.1C74.6,22.8,65.5,35,54.8,45.7C44.1,56.4,31.7,65.5,17.4,71.2C3.2,76.9,-12.9,79.1,-27.1,74.7C-41.2,70.3,-53.4,59.2,-64.1,46.2C-74.8,33.2,-84.1,18.3,-84.9,2.8C-85.7,-12.8,-78,-28.9,-67.2,-41.8C-56.5,-54.6,-42.6,-64.1,-28.9,-71.4C-15.1,-78.7,-1.5,-83.8,11.3,-80C24,-76.3,38.1,-64.5,41.5,-65.7Z" />
+        <path fill="${c.blob3}" transform="translate(-40, -180) scale(2.4) rotate(-30)" d="M38.1,-63.3C49.9,-55.8,60.2,-45.5,67.6,-33.1C74.9,-20.7,79.4,-6.2,77.5,7.5C75.5,21.2,67.2,34.2,56.5,44.5C45.8,54.8,32.7,62.5,18.8,67.5C4.9,72.6,-9.8,75,-23.5,71.6C-37.1,68.3,-49.7,59.2,-59.8,47.8C-69.9,36.3,-77.6,22.4,-80.7,7.6C-83.8,-7.2,-82.3,-22.9,-75.1,-35.8C-67.9,-48.7,-55,-58.8,-41.3,-65.7C-27.5,-72.5,-13.8,-76.1,-0.1,-75.9C13.6,-75.7,27.2,-71.8,38.1,-63.3Z" />
+      </g>
+      <g fill="${c.blob3}" opacity="0.6">
+        <circle cx="180" cy="-220" r="4"/><circle cx="200" cy="-200" r="6"/><circle cx="160" cy="-190" r="5"/>
+        <circle cx="-160" cy="120" r="7"/><circle cx="-180" cy="145" r="4"/><circle cx="-130" cy="150" r="5"/>
+      </g>
+    `;
+  }
+
+  function monthContent(idx, c){
+    if(idx===3){
+      const cup=(ang)=>`<path d="${pointedPetal(46,20)}" transform="rotate(${ang})" fill="rgba(251,246,242,0.7)" stroke="var(--ink)" stroke-width="1.8"/>`;
+      const bloom=`<g transform="translate(0,-52)">${cup(-12)}${cup(0)}${cup(12)}</g>`;
+      const leaves=`<path d="${pointedPetal(68,15)}" transform="translate(-5,6) rotate(200)" fill="rgba(251,246,242,0.8)" stroke="var(--ink)" stroke-width="1.6"/><path d="${pointedPetal(58,13)}" transform="translate(5,6) rotate(160)" fill="rgba(251,246,242,0.8)" stroke="var(--ink)" stroke-width="1.6"/>`;
+      const stem=`<path d="M0,-8 L0,90" stroke="var(--ink)" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+      return stem+leaves+bloom;
+    }
+    if(idx===4){
+      const stem=`<path d="M0,90 Q30,10 70,-10" stroke="var(--ink)" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+      let bells='';
+      [[8,72],[22,52],[38,32],[52,14],[64,-2]].forEach((p,i)=>{
+        const s=1-i*0.12;
+        bells+=`<path d="${bell(11*s,10*s)}" transform="translate(${p[0]},${p[1]}) rotate(20)" fill="rgba(251,246,242,0.9)" stroke="var(--ink)" stroke-width="1.5"/>`;
+      });
+      const leaves=`<path d="${roundPetal(46,20)}" transform="translate(-6,86) rotate(-18)" fill="rgba(251,246,242,0.8)" stroke="var(--ink)" stroke-width="1.6"/><path d="${roundPetal(42,18)}" transform="translate(10,88) rotate(15)" fill="rgba(251,246,242,0.8)" stroke="var(--ink)" stroke-width="1.6"/>`;
+      return stem+bells+leaves;
+    }
+    if(idx===11){
+      const under=poinsettiaBracts(5,30,13,20);
+      const main=poinsettiaBracts(6,40,15,0);
+      const dots=centerDotsRing(6,4,1.8, 'var(--ink)');
+      return stemLeaves(78,roundPetal,0.9)+`<g>${under}${main}${dots}</g>`;
+    }
+    let bloom;
+    switch(idx){
+      case 0: bloom=buildBloom(roundPetal,[{count:8,len:30,wid:19},{count:6,len:19,wid:13,rotOffset:22}],{centerDots:{n:6,r:3.6,dotR:1.4}}); break;
+      case 1: bloom=buildBloom(roundPetal,[{count:5,len:15,wid:11}],{centerR:2.3}); break;
+      case 2: bloom=buildBloom(notchedPetal,[{count:5,len:19,wid:17}],{centerDots:{n:5,r:3,dotR:1}}); break;
+      case 5: bloom=buildBloom(roundPetal,[{count:8,len:28,wid:18},{count:7,len:18,wid:13,rotOffset:18},{count:5,len:10,wid:7,rotOffset:9}]); break;
+      case 6: bloom=buildBloom(pointedPetal,[{count:8,len:25,wid:12},{count:6,len:16,wid:8,rotOffset:15}],{centerDots:{n:6,r:2.4,dotR:1.1}}); break;
+      case 7: bloom=buildBloom(pointedPetal,[{count:9,len:29,wid:11,spreadDeg:210,startDeg:-105},{count:7,len:18,wid:8,spreadDeg:180,startDeg:-90,rotOffset:8}],{centerR:3,centerDots:{n:8,r:5,dotR:1}}); break;
+      case 8: bloom=buildBloom(pointedPetal,[{count:8,len:21,wid:5.5}],{centerR:2}); break;
+      case 9: bloom=buildBloom(roundPetal,[{count:10,len:24,wid:10},{count:9,len:16,wid:7,rotOffset:14},{count:8,len:8,wid:4.5,rotOffset:8}]); break;
+      case 10: bloom=buildBloom(pointedPetal,[{count:15,len:22,wid:3.6},{count:10,len:13,wid:2.8,rotOffset:9}],{centerR:1.5}); break;
+    }
+    const leafFn = idx===1 ? notchedPetal : roundPetal;
+    return stemLeaves(72,leafFn, idx===1?0.7:1) + bloom;
+  }
+
+  function buildSceneSVG(idx){
+    const c = months[idx];
+    const animations = ['anim-jan', 'anim-feb', 'anim-mar', 'anim-apr', 'anim-may', 'anim-jun', 'anim-jul', 'anim-aug', 'anim-sep', 'anim-oct', 'anim-nov', 'anim-dec'];
+    const animClass = animations[idx];
+    
+    let layout = `<g transform="translate(250, 750) scale(3.5)">`;
+    layout += getOrganicBlobs(c); 
+
+    if (idx === 3) {
+      layout += `<g id="tulip-lean" class="flower-group" transform-origin="bottom center">${monthContent(idx, c)}</g>`;
+    } else {
+      layout += `<g class="${animClass} flower-group">${monthContent(idx, c)}</g>`;
+    }
+    layout += `</g>`;
+
+    layout += `<path d="M0,1000 C 150,700 250,900 450,600" stroke="var(--ink)" stroke-width="1.2" fill="none" opacity="0.4" />`;
+    layout += `<path d="M-100,500 C 100,200 400,900 800,200" stroke="var(--ink)" stroke-width="1" fill="none" opacity="0.2" />`;
+    
+    if (idx === 2 || idx === 8) {
+        for(let i=0; i<15; i++) {
+            let startX = 200 + Math.random() * 800;
+            let startY = Math.random() * 200;
+            let delay = Math.random() * 8;
+            layout += `<path d="${roundPetal(6,5)}" transform="translate(${startX},${startY})" fill="${c.petal}" class="anim-mar-float" style="animation-delay:${delay}s;" />`;
+        }
+    }
+    if (idx === 11) {
+        for(let i=0; i<20; i++) {
+            let px = Math.random() * 1000;
+            let py = Math.random() * 1000;
+            let delay = Math.random() * 4;
+            layout += `<circle cx="${px}" cy="${py}" r="2" fill="${c.accent}" class="anim-particle" style="animation-delay:${delay}s;" />`;
+        }
+    }
+
+    return `<svg viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice">${layout}</svg>`;
+  }
+
+  function setMonth(idx){
+    if(idx===currentIdx) return;
+    currentIdx=idx;
+    const incoming = active==='A' ? 'B' : 'A';
+    scenes[incoming].innerHTML = buildSceneSVG(idx);
+    requestAnimationFrame(()=>{
+      scenes[active].classList.remove('active');
+      scenes[incoming].classList.add('active');
+      const old=active; active=incoming;
+      setTimeout(()=>{ scenes[old].innerHTML=''; }, prefersReduced?200:850);
+    });
+  }
+
+  return { setMonth: setMonth };
+})();
+
+const THAI_HOLIDAYS = {
+  '2026-01-01':"New Year's Day",
+  '2026-01-02':'Special Holiday (New Year bridge)',
+  '2026-03-03':'Makha Bucha Day',
+  '2026-04-06':'Chakri Memorial Day',
+  '2026-04-13':'Songkran Festival',
+  '2026-04-14':'Songkran Festival',
+  '2026-04-15':'Songkran Festival',
+  '2026-05-01':'National Labour Day',
+  '2026-05-04':'Coronation Day',
+  '2026-05-31':'Visakha Bucha Day',
+  '2026-06-01':'Substitution for Visakha Bucha',
+  '2026-06-03':"H.M. Queen Suthida's Birthday",
+  '2026-07-28':"H.M. King Vajiralongkorn's Birthday",
+  '2026-07-29':'Asarnha Bucha Day',
+  '2026-07-30':'Buddhist Lent Day (Khao Phansa)',
+  '2026-08-12':"H.M. Queen Mother's Birthday & Mother's Day",
+  '2026-10-13':'H.M. King Bhumibol Memorial Day',
+  '2026-10-23':'Chulalongkorn Memorial Day',
+  '2026-12-05':"King Bhumibol's Birthday, National Day & Father's Day",
+  '2026-12-07':"Substitution for Father's Day",
+  '2026-12-10':'Constitution Day',
+  '2026-12-31':"New Year's Eve"
+};
+function holidayName(isoStr){ return THAI_HOLIDAYS[isoStr] || null; }
+
+let view=new Date();
+let today=new Date(); today.setHours(0,0,0,0);
+let selected=new Date(today);
+let daysWithEntries=new Set();
+let currentDay={notes:[],reminders:[],location:[]};
+
+function pad(n){return n<10?'0'+n:''+n;}
+function iso(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function key(d){return 'day:'+iso(d);}
+function uid(){return Math.random().toString(36).slice(2,9);}
+
+window.storage = window.storage || {
+  _data: {},
+  list: async () => ({ keys: Object.keys(window.storage._data) }),
+  get: async (k) => ({ value: window.storage._data[k] }),
+  set: async (k, v) => { window.storage._data[k] = v; }
+};
+
+/* --- 🔔 ระบบแจ้งเตือน Notification & Blooming --- */
+if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+  Notification.requestPermission();
+}
+
+function triggerFullScreenBloom(text) {
+  const overlay = document.getElementById('fsBloomOverlay');
+  document.getElementById('fsBloomText').textContent = text;
+  overlay.classList.add('active');
+  setTimeout(() => overlay.classList.remove('active'), 5500);
+}
+
+function checkNotifications() {
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  
+  const now = new Date();
+  const todayKey = iso(now);
+  const nowInMins = now.getHours() * 60 + now.getMinutes();
+
+  window.storage.get('day:' + todayKey).then(res => {
+    if(!res || !res.value) return;
+    let data = JSON.parse(res.value);
+    let isUpdated = false;
+
+    data.reminders.forEach(rem => {
+      if(!rem.time) return;
+      const [remH, remM] = rem.time.split(':').map(Number);
+      const remInMins = remH * 60 + remM;
+
+      // แจ้งเตือนล่วงหน้า 15 นาที
+      if(nowInMins === remInMins - 15 && !rem.notified15) {
+        new Notification("🌸 Upcoming Plan in 15 mins", { body: rem.text });
+        rem.notified15 = true;
+        isUpdated = true;
+      }
+      
+      // บานสะพรั่งเต็มจอเมื่อถึงเวลาเป๊ะ
+      if(nowInMins === remInMins && !rem.bloomedExact) {
+        new Notification("✨ It's Time!", { body: rem.text });
+        triggerFullScreenBloom(rem.text);
+        rem.bloomedExact = true;
+        isUpdated = true;
+      }
+    });
+
+    if(isUpdated) {
+      window.storage.set('day:' + todayKey, JSON.stringify(data), false);
+      if(iso(selected) === todayKey) currentDay = data; 
+    }
+  });
+}
+setInterval(checkNotifications, 15000); // เช็คเวลาทุกๆ 15 วินาที
+/* ------------------------------------------- */
+
+async function refreshMonthMarks(){
+  const statusText=document.getElementById('statusText');
+  Botanical.setMonth(view.getMonth());
+  
+  document.getElementById('month').textContent = monthNames[view.getMonth()];
+  document.getElementById('year').textContent = view.getFullYear();
+  document.getElementById('hanakotobaText').textContent = HANAKOTOBA[view.getMonth()];
+
+  try{
+    const res=await window.storage.list('day:', false);
+    daysWithEntries=new Set((res && res.keys ? res.keys : []).map(k=>k.replace('day:','')));
+    statusText.textContent='Synced';
+  }catch(err){
+    statusText.textContent="Couldn't load saved entries — showing a blank calendar.";
+  }
+  renderCalendar();
+}
+
+async function loadDay(d){
+  try{
+    const res=await window.storage.get(key(d), false);
+    const parsed=res && res.value ? JSON.parse(res.value) : {notes:[],reminders:[],location:[]};
+    currentDay={notes:parsed.notes||[], reminders:parsed.reminders||[], location:parsed.location||[]};
+  }catch(err){
+    currentDay={notes:[],reminders:[],location:[]};
+  }
+  renderDetail();
+}
+
+async function saveDay(d){
+  const note=document.getElementById('saveNote');
+  try{
+    await window.storage.set(key(d), JSON.stringify(currentDay), false);
+    
+    // ตรวจสอบว่าถ้ายังมีบันทึกอยู่ ให้ใส่วันนั้นลงใน daysWithEntries เพื่อโชว์ดอกไม้
+    if(currentDay.notes.length > 0 || currentDay.reminders.length > 0 || currentDay.location.length > 0){
+      daysWithEntries.add(iso(d));
+    } else {
+      daysWithEntries.delete(iso(d));
+    }
+    
+    note.textContent='';
+    renderCalendar();
+  }catch(err){
+    note.textContent="Couldn't save that — please try again.";
+  }
+}
+
+function renderCalendar(){
+  const grid=document.getElementById('grid');
+  grid.innerHTML='';
+  const y=view.getFullYear(), m=view.getMonth();
+  const firstDay=new Date(y,m,1).getDay();
+  const daysInMonth=new Date(y,m+1,0).getDate();
+
+  for(let i=0;i<firstDay;i++){
+    const b=document.createElement('div');
+    b.className='day blank';
+    grid.appendChild(b);
+  }
+  for(let day=1; day<=daysInMonth; day++){
+    const cellDate=new Date(y,m,day);
+    const cell=document.createElement('button');
+    cell.type='button';
+    cell.className='day';
+    cell.textContent=day;
+    if(cellDate.getTime()===today.getTime()) cell.classList.add('today');
+    if(cellDate.getTime()===selected.getTime()) cell.classList.add('selected');
+    const hName=holidayName(iso(cellDate));
+    if(hName){
+      cell.classList.add('holiday');
+      cell.title=hName;
+      const flag=document.createElement('span');
+      flag.className='hflag';
+      cell.appendChild(flag);
+    }
+    
+    // 🌱 เปลี่ยนจุดธรรมดาให้เป็นไอคอนดอกไม้ผลิ (Sprout Icon)
+    if(daysWithEntries.has(iso(cellDate))){
+      const sprout = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      sprout.setAttribute('viewBox','0 0 24 24');
+      sprout.setAttribute('class','sprout-icon');
+      sprout.setAttribute('fill','none');
+      sprout.setAttribute('stroke','currentColor');
+      sprout.setAttribute('stroke-width','2');
+      sprout.innerHTML = '<path d="M12 21V11"/><path d="M12 11C12 7 8 7 8 3C12 3 12 7 12 11Z"/><path d="M12 11C12 7 16 7 16 3C12 3 12 7 12 11Z"/><circle cx="12" cy="7" r="1.5" fill="currentColor"/>';
+      cell.appendChild(sprout);
+      cell.classList.add('has-bloom');
+    }
+    
+    cell.addEventListener('click',()=>{
+      selected=cellDate;
+      renderCalendar();
+      loadDay(selected);
+      if(window.matchMedia('(max-width:720px)').matches){
+        document.getElementById('detailCard').scrollIntoView({behavior:'smooth', block:'start'});
+      }
+    });
+    grid.appendChild(cell);
+  }
+}
+
+function renderList(type, arr){
+  const el=document.getElementById('list-'+type);
+  el.innerHTML='';
+  if(!arr.length){
+    const p=document.createElement('div');
+    p.className='empty';
+    p.textContent=
+      type==='notes' ? 'Nothing jotted down yet.' :
+      type==='reminders' ? 'No reminders set.' : 'No place added.';
+    el.appendChild(p);
+    return;
+  }
+  arr.forEach(item=>{
+    const row=document.createElement('div');
+    row.className='entry '+type;
+    const txt=document.createElement('div');
+    txt.className='txt';
+    if(type==='reminders' && item.time){
+      const chip=document.createElement('span');
+      chip.className='time-chip';
+      chip.textContent=item.time;
+      txt.appendChild(chip);
+    }
+    if(type==='location'){
+      const link=document.createElement('a');
+      link.href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(item.text);
+      link.target='_blank';
+      link.rel='noopener noreferrer';
+      link.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21C12 21 5 14 5 9.2C5 5.2 8.1 2 12 2C15.9 2 19 5.2 19 9.2C19 14 12 21 12 21Z"/><circle cx="12" cy="9" r="2.6"/></svg>';
+      link.appendChild(document.createTextNode(item.text));
+      const suffix=document.createElement('span');
+      suffix.className='go';
+      suffix.textContent='Open in Maps ↗';
+      link.appendChild(suffix);
+      txt.appendChild(link);
+    } else {
+      txt.appendChild(document.createTextNode(item.text));
+    }
+    const rm=document.createElement('button');
+    rm.className='remove-btn';
+    rm.setAttribute('aria-label','Remove');
+    rm.textContent='×';
+    rm.addEventListener('click',()=>{
+      currentDay[type]=currentDay[type].filter(x=>x.id!==item.id);
+      renderDetail();
+      saveDay(selected);
+    });
+    row.appendChild(txt);
+    row.appendChild(rm);
+    el.appendChild(row);
+  });
+}
+
+function renderDetail(){
+  document.getElementById('detailNum').textContent=selected.getDate();
+  document.getElementById('detailWeekday').textContent=weekdayNames[selected.getDay()];
+  document.getElementById('detailMonth').textContent=monthNames[selected.getMonth()]+' '+selected.getFullYear();
+  const hName=holidayName(iso(selected));
+  const banner=document.getElementById('holidayBanner');
+  if(hName){
+    banner.classList.add('show');
+    document.getElementById('holidayBannerText').textContent=hName+' — Thai public holiday';
+  } else {
+    banner.classList.remove('show');
+  }
+  renderList('notes', currentDay.notes);
+  renderList('reminders', currentDay.reminders);
+  renderList('location', currentDay.location);
+}
+
+document.querySelectorAll('.add-link').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const form=document.getElementById('form-'+btn.dataset.form);
+    form.classList.toggle('show');
+  });
+});
+
+function submitEntry(type){
+  const noteEl=document.getElementById('saveNote');
+  if(type==='notes'){
+    const input=document.getElementById('input-notes-text');
+    const val=input.value.trim();
+    if(!val){ noteEl.textContent='Write something first.'; return; }
+    currentDay.notes.push({id:uid(), text:val});
+    input.value='';
+  } else if(type==='reminders'){
+    const timeInput=document.getElementById('input-reminders-time');
+    const textInput=document.getElementById('input-reminders-text');
+    const val=textInput.value.trim();
+    if(!val){ noteEl.textContent='Give the reminder a title.'; return; }
+    // แนบสถานะเพื่อจัดการการแจ้งเตือนไว้ตั้งแต่ตอน Save
+    currentDay.reminders.push({id:uid(), text:val, time:timeInput.value||'', notified15: false, bloomedExact: false});
+    currentDay.reminders.sort((a,b)=> (a.time||'99:99').localeCompare(b.time||'99:99'));
+    textInput.value=''; timeInput.value='';
+  } else if(type==='location'){
+    const input=document.getElementById('input-location-text');
+    const val=input.value.trim();
+    if(!val){ noteEl.textContent='Add a place first.'; return; }
+    currentDay.location.push({id:uid(), text:val});
+    input.value='';
+  }
+  document.getElementById('form-'+type).classList.remove('show');
+  renderDetail();
+  saveDay(selected);
+}
+
+document.querySelectorAll('[data-save]').forEach(btn=>{
+  btn.addEventListener('click',()=>submitEntry(btn.dataset.save));
+});
+['input-notes-text','input-location-text'].forEach(id=>{
+  document.getElementById(id).addEventListener('keydown', e=>{
+    if(e.key==='Enter') submitEntry(id.includes('notes')?'notes':'location');
+  });
+});
+document.getElementById('input-reminders-text').addEventListener('keydown', e=>{
+  if(e.key==='Enter') submitEntry('reminders');
+});
+
+document.getElementById('prevBtn').addEventListener('click',()=>{
+  view=new Date(view.getFullYear(), view.getMonth()-1, 1);
+  refreshMonthMarks();
+});
+document.getElementById('nextBtn').addEventListener('click',()=>{
+  view=new Date(view.getFullYear(), view.getMonth()+1, 1);
+  refreshMonthMarks();
+});
+document.getElementById('todayBtn').addEventListener('click',()=>{
+  view=new Date(today.getFullYear(), today.getMonth(), 1);
+  selected=new Date(today);
+  refreshMonthMarks();
+  loadDay(selected);
+});
+
+// Wallpaper Event
+document.getElementById('exportWallpaperBtn').addEventListener('click', () => { window.print(); });
+
+// Init
+refreshMonthMarks();
+loadDay(selected);
+</script>
+</body>
+</html>
