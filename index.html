@@ -7,7 +7,7 @@
 <title>Bloom Calendar - Chic Edition</title>
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --paper:#FBF6F2;
@@ -211,26 +211,86 @@
   .botanical-bg .scene svg{display:block; width:100%; height:100%;}
   .flower-group { transform-box: fill-box; transform-origin: center; }
 
-  /* Full Screen Bloom Modal */
+  /* ========================================================
+     ✨ BEAUTIFUL FULL-SCREEN BLOOM OVERLAY
+  ======================================================== */
   .fullscreen-bloom {
     position: fixed; inset: 0; pointer-events: none; z-index: 9999;
     display: flex; align-items: center; justify-content: center; flex-direction: column;
-    opacity: 0; transition: opacity 0.5s ease;
-    background: rgba(251,246,242,0.85); backdrop-filter: blur(10px);
+    opacity: 0; transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    background: radial-gradient(circle at center, rgba(251,246,242,0.92) 0%, rgba(240,184,196,0.5) 100%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    cursor: pointer;
   }
   .fullscreen-bloom.active { opacity: 1; pointer-events: auto; }
-  .fullscreen-bloom svg {
-    width: 180px; height: 180px; color: var(--gold);
-    transform: scale(0) rotate(-45deg); 
-    transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  .bloom-container {
+    position: relative;
+    width: 280px; height: 280px;
+    display: flex; align-items: center; justify-content: center;
   }
-  .fullscreen-bloom.active svg { transform: scale(1) rotate(0deg); }
-  .fullscreen-bloom .bloom-text {
-    position: absolute; margin-top: 220px; font-family: 'Cormorant Garamond', serif;
-    font-size: 32px; font-weight: 600; color: var(--ink); text-align: center;
-    opacity: 0; transition: opacity 1s 0.4s;
+
+  .bloom-flower-svg {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    transform: scale(0) rotate(-45deg);
+    transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
-  .fullscreen-bloom.active .bloom-text { opacity: 1; }
+  .fullscreen-bloom.active .bloom-flower-svg {
+    transform: scale(1) rotate(0deg);
+  }
+
+  .fullscreen-bloom.active .bloom-petal-outer {
+    animation: petalGlow 3s ease-in-out infinite alternate;
+  }
+  @keyframes petalGlow {
+    0% { transform: scale(1) rotate(0deg); }
+    100% { transform: scale(1.06) rotate(6deg); }
+  }
+
+  .fullscreen-bloom.active .bloom-particles circle {
+    animation: particleSparkle 2s ease-in-out infinite alternate;
+  }
+  @keyframes particleSparkle {
+    0% { opacity: 0.2; transform: scale(0.6); }
+    100% { opacity: 1; transform: scale(1.2); }
+  }
+
+  .bloom-card-text {
+    margin-top: 30px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.3s;
+    max-width: 80%;
+  }
+  .fullscreen-bloom.active .bloom-card-text {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .bloom-tag {
+    font-family: 'Quicksand', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+  .bloom-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 38px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.1;
+  }
+  .bloom-dismiss-hint {
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin-top: 14px;
+    font-style: italic;
+  }
 
   @media (prefers-reduced-motion: no-preference){
     .anim-jan { animation: swaySlow 12s ease-in-out infinite; transform-origin: bottom center; }
@@ -272,16 +332,51 @@
 </head>
 <body>
 
+<!-- ✨ GORGEOUS FULLSCREEN BLOOM MODAL -->
 <div class="fullscreen-bloom" id="fsBloomOverlay" onclick="this.classList.remove('active')">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-    <path d="M12 21V11"/>
-    <path d="M12 11C12 7 8 7 8 3C12 3 12 7 12 11Z"/>
-    <path d="M12 11C12 7 16 7 16 3C12 3 12 7 12 11Z"/>
-    <circle cx="12" cy="7" r="1.5" fill="currentColor"/>
-    <path d="M6 14C6 11 3 11 3 8C7 8 7 11 7 14Z"/>
-    <path d="M18 14C18 11 21 11 21 8C17 8 17 11 17 14Z"/>
-  </svg>
-  <div class="bloom-text" id="fsBloomText">It's time!</div>
+  <div class="bloom-container">
+    <svg class="bloom-flower-svg" viewBox="-120 -120 240 240">
+      <!-- Outer Blooming Layer -->
+      <g class="bloom-petal-outer" fill="rgba(240,184,196,0.35)" stroke="var(--rose-deep)" stroke-width="1.8">
+        <path d="M0,0 C -25,-40 -20,-85 0,-105 C 20,-85 25,-40 0,0 Z" />
+        <path d="M0,0 C -25,-40 -20,-85 0,-105 C 20,-85 25,-40 0,0 Z" transform="rotate(45)" />
+        <path d="M0,0 C -25,-40 -20,-85 0,-105 C 20,-85 25,-40 0,0 Z" transform="rotate(90)" />
+        <path d="M0,0 C -25,-40 -20,-85 0,-105 C 20,-85 25,-40 0,0 Z" transform="rotate(135)" />
+        <path d="M0,0 C -25,-40 -20,-85 0,-105 C 20,-85 25,-40 0,0 Z" transform="rotate(180)" />
+        <path d="M0,0 C -25,-40 -20,-85 0,-105 C 20,-85 25,-40 0,0 Z" transform="rotate(225)" />
+        <path d="M0,0 C -25,-40 -20,-85 0,-105 C 20,-85 25,-40 0,0 Z" transform="rotate(270)" />
+        <path d="M0,0 C -25,-40 -20,-85 0,-105 C 20,-85 25,-40 0,0 Z" transform="rotate(315)" />
+      </g>
+      <!-- Inner Golden Flora Layer -->
+      <g fill="rgba(255,255,255,0.7)" stroke="var(--gold)" stroke-width="1.6" transform="rotate(22.5)">
+        <path d="M0,0 C -18,-25 -15,-65 0,-78 C 15,-65 18,-25 0,0 Z" />
+        <path d="M0,0 C -18,-25 -15,-65 0,-78 C 15,-65 18,-25 0,0 Z" transform="rotate(45)" />
+        <path d="M0,0 C -18,-25 -15,-65 0,-78 C 15,-65 18,-25 0,0 Z" transform="rotate(90)" />
+        <path d="M0,0 C -18,-25 -15,-65 0,-78 C 15,-65 18,-25 0,0 Z" transform="rotate(135)" />
+        <path d="M0,0 C -18,-25 -15,-65 0,-78 C 15,-65 18,-25 0,0 Z" transform="rotate(180)" />
+        <path d="M0,0 C -18,-25 -15,-65 0,-78 C 15,-65 18,-25 0,0 Z" transform="rotate(225)" />
+        <path d="M0,0 C -18,-25 -15,-65 0,-78 C 15,-65 18,-25 0,0 Z" transform="rotate(270)" />
+        <path d="M0,0 C -18,-25 -15,-65 0,-78 C 15,-65 18,-25 0,0 Z" transform="rotate(315)" />
+      </g>
+      <!-- Golden Core & Stamen -->
+      <circle cx="0" cy="0" r="14" fill="var(--gold)" />
+      <circle cx="0" cy="0" r="18" fill="none" stroke="var(--gold)" stroke-width="1.2" stroke-dasharray="3,3" />
+      <!-- Golden Pollen Sparks -->
+      <g class="bloom-particles" fill="var(--gold)">
+        <circle cx="-60" cy="-60" r="2.5" />
+        <circle cx="65" cy="-50" r="3" />
+        <circle cx="-70" cy="40" r="2" />
+        <circle cx="55" cy="65" r="2.5" />
+        <circle cx="0" cy="-90" r="2" />
+        <circle cx="0" cy="90" r="2" />
+      </g>
+    </svg>
+  </div>
+  <div class="bloom-card-text">
+    <div class="bloom-tag">In Full Bloom</div>
+    <div class="bloom-title" id="fsBloomText">It's time!</div>
+    <div class="bloom-dismiss-hint">Tap anywhere to close</div>
+  </div>
 </div>
 
 <div class="botanical-bg" id="botanicalBg" aria-hidden="true">
@@ -309,7 +404,6 @@
     </div>
 
     <div class="top-actions">
-      <!-- ปุ่มขอสิทธิ์การแจ้งเตือนแบบ Direct Action -->
       <button class="action-chip" id="enableNotifyBtn">🔔 Enable Alerts</button>
       <button class="action-chip" id="exportWallpaperBtn">
         <svg style="width:13px;height:13px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
@@ -666,7 +760,44 @@ window.storage = window.storage || {
   set: async (k, v) => { window.storage._data[k] = v; }
 };
 
-/* --- 🔔 Notification Request Button Logic --- */
+/* ========================================================
+   🎵 CRYSTAL WIND CHIME SOUND GENERATOR
+======================================================== */
+function playChimeSound() {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+
+    // 4 Melodic Chime Notes: E5 (659.25Hz), G#5 (830.61Hz), B5 (987.77Hz), E6 (1318.51Hz)
+    const freqs = [659.25, 830.61, 987.77, 1318.51];
+    
+    freqs.forEach((freq, idx) => {
+      const startTime = ctx.currentTime + (idx * 0.14);
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, startTime);
+
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(0.22, startTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 1.6);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(startTime);
+      osc.stop(startTime + 1.65);
+    });
+  } catch (e) {
+    console.log("Audio play error:", e);
+  }
+}
+
+/* ========================================================
+   🔔 NOTIFICATION & BLOOM TRIGGER
+======================================================== */
 const notifyBtn = document.getElementById('enableNotifyBtn');
 
 function updateNotifyButtonState() {
@@ -689,11 +820,14 @@ notifyBtn.addEventListener('click', () => {
     alert("This device doesn't support notifications.");
     return;
   }
+  // Play test chime on click
+  playChimeSound();
+
   Notification.requestPermission().then(permission => {
     updateNotifyButtonState();
     if (permission === 'granted') {
       new Notification("🌸 Bloom Calendar", {
-        body: "Alerts enabled! You're ready to receive notifications."
+        body: "Alerts & Chime sound enabled! You're all set."
       });
     }
   });
@@ -701,11 +835,12 @@ notifyBtn.addEventListener('click', () => {
 updateNotifyButtonState();
 
 function triggerFullScreenBloom(text) {
+  playChimeSound(); // เล่นเสียงกระดิ่งใสทันทีที่เริ่มบาน
   const overlay = document.getElementById('fsBloomOverlay');
   if(!overlay) return;
   document.getElementById('fsBloomText').textContent = text;
   overlay.classList.add('active');
-  setTimeout(() => overlay.classList.remove('active'), 5500);
+  setTimeout(() => overlay.classList.remove('active'), 6500);
 }
 
 async function checkNotifications() {
@@ -727,8 +862,9 @@ async function checkNotifications() {
       const [remH, remM] = rem.time.split(':').map(Number);
       const remInMins = remH * 60 + remM;
 
-      // 1. แจ้งเตือนล่วงหน้า 15 นาที
+      // 1. แจ้งเตือนล่วงหน้า 15 นาที + เสียงกระดิ่ง
       if (nowInMins >= remInMins - 15 && nowInMins < remInMins && !rem.notified15) {
+        playChimeSound();
         if ("Notification" in window && Notification.permission === "granted") {
           new Notification("🌸 Upcoming Plan in 15 mins", { body: rem.text || "You have an upcoming plan." });
         }
@@ -736,7 +872,7 @@ async function checkNotifications() {
         isUpdated = true;
       }
       
-      // 2. บานสะพรั่งเต็มจอและแจ้งเตือนเมื่อถึงเวลาจริง
+      // 2. บานสะพรั่งเต็มจอ + เสียงกระดิ่งเมื่อถึงเวลาจริง
       if (nowInMins >= remInMins && !rem.bloomedExact) {
         if ("Notification" in window && Notification.permission === "granted") {
           new Notification("✨ It's Time!", { body: rem.text || "Your plan is starting now." });
@@ -840,7 +976,7 @@ function renderCalendar(){
       sprout.setAttribute('fill','none');
       sprout.setAttribute('stroke','currentColor');
       sprout.setAttribute('stroke-width','2');
-      sprout.innerHTML = '<path d="M12 21V11"/><path d="M12 11C12 7 8 7 8 3C12 3 12 7 12 11Z"/><path d="M12 11C12 7 16 7 16 3C12 3 12 7 12 11Z"/><circle cx="12" cy="7" r="1.5" fill="currentColor"/>';
+      sprout.innerHTML = '<path d="M12 21V11"/><path d="M12 11C12 7 8 7 8 3C12 3 12 7 12 7Z"/><path d="M12 11C12 7 16 7 16 3C12 3 12 7 12 11Z"/><circle cx="12" cy="7" r="1.5" fill="currentColor"/>';
       cell.appendChild(sprout);
       cell.classList.add('has-bloom');
     }
