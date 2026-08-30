@@ -753,11 +753,17 @@ function iso(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate
 function key(d){return 'day:'+iso(d);}
 function uid(){return Math.random().toString(36).slice(2,9);}
 
-window.storage = window.storage || {
-  _data: {},
-  list: async () => ({ keys: Object.keys(window.storage._data) }),
-  get: async (k) => ({ value: window.storage._data[k] }),
-  set: async (k, v) => { window.storage._data[k] = v; }
+window.storage = {
+  list: async () => {
+    const keys = Object.keys(localStorage).filter(k => k.startsWith('day:'));
+    return { keys };
+  },
+  get: async (k) => {
+    return { value: localStorage.getItem(k) };
+  },
+  set: async (k, v) => {
+    localStorage.setItem(k, v);
+  }
 };
 
 /* ========================================================
