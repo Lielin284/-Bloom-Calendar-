@@ -7,7 +7,7 @@
   "theme_color": "#FBF6F2",
   "icons": [
     {
-      "src": "icon.png",
+      "src": "BloomLogo.png",
       "sizes": "512x512",
       "type": "image/png"
     }
